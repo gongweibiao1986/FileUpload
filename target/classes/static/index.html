@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>File Upload</title>
+</head>
+<body>
+<h1>File Upload</h1>
+<form id="uploadForm" enctype="multipart/form-data">
+  <input type="file" name="files" multiple>
+  <button type="submit">Upload</button>
+</form>
+<hr>
+<h2>Uploaded Files</h2>
+<ul id="fileList"></ul>
+<script>
+  const uploadForm = document.getElementById('uploadForm');
+  const fileList = document.getElementById('fileList');
+
+  uploadForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const files = document.querySelector('[type=file]').files;
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append('files', files[i]);
+    }
+    fetch('/upload', {
+      method: 'POST',
+      body: formData
+    })
+            .then(response => response.json())
+            .then(data => {
+              console.log(data);
+              const li = document.createElement('li');
+              const a = document.createElement('a');
+              a.href = '/preview/' + data.id;
+              a.textContent = data.fileName;
+              li.appendChild(a);
+              fileList.appendChild(li);
+            })
+            .catch(error => console.error(error));
+  });
+
+  fetch('/files')
+          .then(response => response.json())
+          .then(data => {
+            console.log(data);
+            data.forEach(file => {
+              const li = document.createElement('li');
+              const a = document.createElement('a');
+              a.href = '/preview/' + file.id;
+              a.textContent = file.fileName;
+              li.appendChild(a);
+              fileList.appendChild(li);
+            });
+          })
+          .catch(error => console.error(error));
+</script>
+</body>
+</html>
